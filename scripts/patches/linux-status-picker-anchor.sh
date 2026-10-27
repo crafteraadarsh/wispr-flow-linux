@@ -109,9 +109,14 @@ sites = [
 		+ NO_ARROW + r'{0,300}?'
 		+ fwd('contextMenuWindow', 'ShowExtensionContextMenu')
 		+ r'(?P<arg>(?P=p))\)')),
+	# The drawer forwards from a queueMicrotask(async ...) body after the
+	# calendar lookup: 149 characters past the log line on 1.6.957, 469 on
+	# 1.6.1209 and 1.6.1264 (the lookup grew). The budget leaves room for the
+	# body to grow again; the forward's own channel name keeps it from
+	# reaching a neighbouring handler, and the count is asserted.
 	("D shortcut-join drawer", 1, "in", re.compile(
 		r'\.ShowShortcutJoinDrawer,!0,' + ID + r'=>[^;]{0,300}?'
-		+ Q + r'Showing shortcut join drawer' + Q + r'[\s\S]{0,400}?'
+		+ Q + r'Showing shortcut join drawer' + Q + r'[\s\S]{0,1000}?'
 		+ fwd('contextMenuWindow', 'ShowShortcutJoinDrawer')
 		+ r'\{\.\.\.(?P<arg>' + ID + r'),')),
 	("E DidHide cursor point", 2, "out", re.compile(

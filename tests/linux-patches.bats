@@ -624,6 +624,38 @@ setTimeout(() => {
 	[[ "$output" == *'status DidHide 1250,1030'* ]]
 }
 
+# Grow the drawer's async body by a statement of exactly $1 characters, after
+# the calendar lookup's C(!1); call, the way 1.6.1209 grew it.
+pad_drawer_body() {
+	local n="$1" pad
+	pad=$(printf 'x%.0s' $(seq "$((n - 13))"))
+	sed -i "s/const t=(0,b.QW)();C(!1);/&o().info(\"$pad\");/" "$FIX"
+}
+
+@test "picker-anchor: site D reaches a drawer forward 469 characters past its log line (1.6.1209)" {
+	command -v node >/dev/null || skip 'node not installed'
+	[[ "$(uname -s)" == Linux ]] || skip 'the gate is linux-only'
+	write_picker_fixture
+	# 149 characters on 1.6.957, 469 on 1.6.1209 and 1.6.1264
+	pad_drawer_body 320
+	run bash "$PATCH_DIR/linux-status-picker-anchor.sh" "$FIX"
+	[[ "$status" -eq 0 ]]
+	grep -qF 'd.qM.ShowShortcutJoinDrawer,{.../*WISPR_LINUX_PICKER_ANCHOR*/' "$FIX"
+	run run_picker_fixture '' 'wayland-0'
+	[[ "$status" -eq 0 ]]
+	[[ "$output" == *'menu ShowShortcutJoinDrawer 1230,1012'* ]]
+}
+
+@test "picker-anchor: site D's budget is 1000 characters past the log line (near miss at 1001)" {
+	write_picker_fixture
+	pad_drawer_body 852
+	cp "$FIX" "$TEST_TMP/before.js"
+	run bash "$PATCH_DIR/linux-status-picker-anchor.sh" "$FIX"
+	[[ "$status" -ne 0 ]]
+	[[ "$output" == *"'D shortcut-join drawer' site(s), found 0"* ]]
+	cmp -s "$FIX" "$TEST_TMP/before.js"
+}
+
 @test "picker-anchor: idempotent on second run" {
 	write_picker_fixture
 	bash "$PATCH_DIR/linux-status-picker-anchor.sh" "$FIX"

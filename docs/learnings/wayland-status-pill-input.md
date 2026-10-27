@@ -40,9 +40,10 @@ alone was enough.
 
 The compositor cannot see the DOM, so the renderer tells it. The window title is
 the one channel a Wayland client has to the compositor with no new protocol and
-no preload/IPC change. The status page has no `<title>` and the app never reads
-that window's title (the one `getTitle()` comparison is for the feature tour), so
-it is free to carry the box.
+no preload/IPC change. The status page sets `document.title="Status"` once at
+startup and never again, and the app reads that window's title only for logs and
+process stats (it tells the status window apart by object, not by title), so the
+title is free to carry the box.
 
 ## The title format
 

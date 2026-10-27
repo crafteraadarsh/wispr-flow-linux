@@ -126,6 +126,7 @@ fi
 setup_logging || exit 1
 setup_electron_env
 cleanup_stale_lock
+migrate_legacy_data_dir
 
 log_message '--- Wispr Flow Launcher Start (appimage) ---'
 log_message "Timestamp: \$(date)"
@@ -185,6 +186,13 @@ if [[ -f "$ICON_SVG" ]]; then
 fi
 
 say "AppStream metadata"
+# NOTE: deliberately NO <icon> element. For a desktop-application component the
+# icon is resolved from the <launchable> .desktop file's Icon= key, so an
+# <icon type="stock"> here is redundant -- and appstream-glib's appstream-util
+# rejects it outright ("<icon> not allowed in desktop appdata"). appimagetool
+# runs whichever validators are installed, so declaring it broke the AppImage
+# build on hosts that have appstream-glib (e.g. Arch) while passing where only
+# the newer appstreamcli is present (e.g. the Ubuntu CI runners).
 cat > "$APPDIR/usr/share/metainfo/${COMPONENT_ID}.appdata.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
@@ -201,7 +209,6 @@ cat > "$APPDIR/usr/share/metainfo/${COMPONENT_ID}.appdata.xml" <<EOF
     </p>
   </description>
   <launchable type="desktop-id">${COMPONENT_ID}.desktop</launchable>
-  <icon type="stock">${COMPONENT_ID}</icon>
   <url type="homepage">https://wisprflow.ai</url>
   <provides>
     <binary>AppRun</binary>

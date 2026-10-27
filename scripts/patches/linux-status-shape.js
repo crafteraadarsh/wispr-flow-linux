@@ -2,7 +2,9 @@
 /*
  * Publishes the status pill's painted bounding box in document.title as
  * "Status|x,y,w,h" (CSS px, window-relative) so the GNOME Window Bridge
- * extension can restrict the pill window's input area to it.
+ * extension can restrict the pill window's input area to it. The helper's
+ * STATUS_TITLE_RE parses this format, so change both together (see
+ * docs/learnings/wayland-status-pill-input.md, "The title format").
  *
  * Why: the status window is larger than the pill, and Wispr makes the empty
  * part click-through by polling pixel alpha and toggling setIgnoreMouseEvents,

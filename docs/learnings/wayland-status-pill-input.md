@@ -44,6 +44,22 @@ no preload/IPC change. The status page has no `<title>` and the app never reads
 that window's title (the one `getTitle()` comparison is for the feature tour), so
 it is free to carry the box.
 
+## The title format
+
+The title is a contract between the two repos: `linux-status-shape.js` here
+writes it, and `STATUS_TITLE_RE` in the helper's
+`src/backend/gnome_extension/extension.js` parses it. Change both together.
+
+```
+Status|x,y,w,h
+```
+
+`x,y,w,h` are integers in CSS pixels, relative to the window's top-left corner:
+the painted box plus a 6px pad, clamped to the window. A bare `Status` (an
+unpatched app, or before the first measurement) means no box, and the extension
+leaves the window unclipped. The extension also recognises the pill by this
+title, with or without a box, so the `Status` prefix must stay.
+
 ## What "painted" means
 
 It mirrors Wispr's own hit test, where any pixel with alpha > 0 captures input,
